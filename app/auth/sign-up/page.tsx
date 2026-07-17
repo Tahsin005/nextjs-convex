@@ -23,7 +23,7 @@ export default function SignUpPage() {
     });
 
     async function onsubmit(data: z.infer<typeof signUpSchema>) {
-
+        console.log(data)
     }
     return (
         <Card>
