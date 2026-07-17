@@ -5,14 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 export default function SignUpPage() {
     const [isPending, startTransition] = useTransition();
+    const router = useRouter();
     const form = useForm({
         resolver: zodResolver(signUpSchema),
         defaultValues: {
@@ -23,7 +27,22 @@ export default function SignUpPage() {
     });
 
     async function onsubmit(data: z.infer<typeof signUpSchema>) {
-        console.log(data)
+        startTransition(async () => {
+            await authClient.signUp.email({
+                email: data.email,
+                name: data.name,
+                password: data.password,
+                fetchOptions: {
+                    onSuccess: () => {
+                        toast.success("Account created successfully");
+                        router.push("/");
+                    },
+                    onError: (error) => {
+                        toast.error(error.error.message);
+                    },
+                },
+            });
+        });
     }
     return (
         <Card>
@@ -92,7 +111,7 @@ export default function SignUpPage() {
                             )}
                         />
 
-                        <Button disabled={isPending}>
+                        <Button type="submit" disabled={isPending}>
                             {isPending ? (
                                 <>
                                     <Loader2 className="size-4 animate-spin" />
