@@ -16,20 +16,16 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useTransition } from "react";
-import { toast } from "sonner";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { postSchema } from "@/app/schemas/blog";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useMutation } from "convex/react";
-import { api } from "@/convex/_generated/api";
+import { createBlogAction } from "@/app/action";
 
 export default function CreateRoute() {
     const [isPending, startTransition] = useTransition();
-    const mutation = useMutation(api.posts.createPost)
-
     const form = useForm({
         resolver: zodResolver(postSchema),
         defaultValues: {
@@ -40,21 +36,12 @@ export default function CreateRoute() {
 
     function onSubmit(values: z.infer<typeof postSchema>) {
         startTransition(async () => {
-            try {
-                await mutation({
-                    body: values.content,
-                    title: values.title,
-                });
-                form.reset();
-                toast.success("Post created successfully!");
-            } catch (error) {
-                console.error("Failed to create post:", error);
-                toast.error(
-                    error instanceof Error ? error.message : "Failed to create post"
-                );
-            }
+            console.log("hey this runs on the client side");
+
+            await createBlogAction(values);
         });
     }
+    
     return (
         <div className="py-12">
             <div className="text-center mb-12">
