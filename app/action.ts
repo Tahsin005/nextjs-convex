@@ -16,12 +16,34 @@ export async function createBlogAction(values: z.infer<typeof postSchema>) {
         }
 
         const token = await getToken();
+        const imageUrl = await fetchMutation(
+            api.posts.generateImageUploadUrl,
+            {},
+            { token }
+        );
+
+        const uploadResult = await fetch(imageUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": parsed.data.image.type,
+            },
+            body: parsed.data.image,
+        });
+
+        if (!uploadResult.ok) {
+            return {
+                error: "Failed to upload image",
+            };
+        }
+
+        const { storageId } = await uploadResult.json();
 
         await fetchMutation(
             api.posts.createPost,
             {
                 body: parsed.data.content,
                 title: parsed.data.title,
+                imageStorageId: storageId,
             },
             { token }
         );

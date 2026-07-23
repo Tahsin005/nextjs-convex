@@ -6,5 +6,6 @@ export default defineSchema({
         title: v.string(),
         body: v.string(),
         authorId: v.string(),
+        imageStorageId: v.id("_storage"),
     })
 });

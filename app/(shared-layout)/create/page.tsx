@@ -31,6 +31,7 @@ export default function CreateRoute() {
         defaultValues: {
             content: "",
             title: "",
+            image: undefined
         },
     });
 
@@ -41,7 +42,7 @@ export default function CreateRoute() {
             await createBlogAction(values);
         });
     }
-    
+
     return (
         <div className="py-12">
             <div className="text-center mb-12">
@@ -89,6 +90,29 @@ export default function CreateRoute() {
                                             aria-invalid={fieldState.invalid}
                                             placeholder="Super cool blog content"
                                             {...field}
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+
+                            <Controller
+                                name="image"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel>Image</FieldLabel>
+                                        <Input
+                                            aria-invalid={fieldState.invalid}
+                                            placeholder="Image"
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(event) => {
+                                                const file = event.target.files?.[0];
+                                                field.onChange(file);
+                                            }}
                                         />
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />
