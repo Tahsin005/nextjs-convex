@@ -1,9 +1,10 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { CommentSection } from "@/components/web/CommentSection";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { getToken } from "@/lib/auth-server";
-import { fetchQuery } from "convex/nextjs";
+import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { ArrowLeft, FileQuestion } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,8 +20,11 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
 
     const token = await getToken();
 
-    const [post] = await Promise.all([
+    const [post, preloadedComments] = await Promise.all([
         await fetchQuery(api.posts.getPostById, { postId: postId }),
+        await preloadQuery(api.comments.getCommentsByPostId, {
+            postId: postId,
+        }),
     ]);
 
     if (!post) {
@@ -78,7 +82,7 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                 <div className="flex items-center gap-2">
                     <p className="text-sm text-muted-foreground">
                         Posted on:{" "}
-                        {new Date(post._creationTime).toLocaleDateString("en-US")}
+                        {new Date(post._creationTime).toLocaleDateString("de-DE")}
                     </p>
                 </div>
 
@@ -89,6 +93,8 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                 </p>
 
                 <Separator className="my-8" />
+
+                <CommentSection preloadedComments={preloadedComments} />
             </div>
         </div>
     )
