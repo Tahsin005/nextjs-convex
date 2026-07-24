@@ -6,6 +6,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { getToken } from "@/lib/auth-server";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
 import { ArrowLeft, FileQuestion } from "lucide-react";
+import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -13,6 +14,52 @@ interface PostIdRouteProps {
     params: Promise<{
         postId: Id<"posts">;
     }>;
+}
+
+export async function generateMetadata({
+    params,
+}: PostIdRouteProps): Promise<Metadata> {
+    const { postId } = await params;
+
+    const post = await fetchQuery(api.posts.getPostById, { postId: postId });
+
+    if (!post) {
+        return {
+            title: "Post not found",
+            description: "The post you are looking for does not exist.",
+        };
+    }
+
+    const description = post.body.length > 160 ? `${post.body.substring(0, 157)}...` : post.body;
+    const imageUrl = post.imageUrl ?? "https://images.unsplash.com/photo-1761019646782-4bc46ba43fe9?q=80&w=1631&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D";
+
+    return {
+        title: post.title,
+        description: description,
+        category: "Web development",
+        authors: [{ name: "MD. Tahsin Ferdous" }],
+        openGraph: {
+            title: post.title,
+            description: description,
+            type: "article",
+            publishedTime: new Date(post._creationTime).toISOString(),
+            url: `/blog/${postId}`,
+            images: [
+                {
+                    url: imageUrl,
+                    width: 1200,
+                    height: 630,
+                    alt: post.title,
+                },
+            ],
+        },
+        twitter: {
+            card: "summary_large_image",
+            title: post.title,
+            description: description,
+            images: [imageUrl],
+        },
+    };
 }
 
 export default async function PostIdRoute({ params }: PostIdRouteProps) {

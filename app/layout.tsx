@@ -19,8 +19,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NextBlog",
-  description: "",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  ),
+  title: {
+    default: "NextPro",
+    template: "%s | NextPro",
+  },
+  description: "NextPro - A modern blog platform built with Next.js and Convex.",
+  keywords: ["Next.js", "React", "Convex", "Blog", "Web Development"],
+  authors: [{ name: "MD. Tahsin Ferdous" }],
+  creator: "MD. Tahsin Ferdous",
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "NextPro",
+    description: "NextPro - A modern blog platform built with Next.js and Convex.",
+    siteName: "NextPro",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NextPro",
+    description: "NextPro - A modern blog platform built with Next.js and Convex.",
+    creator: "@Tahsin005",
+  },
 };
 
 export default function RootLayout({
