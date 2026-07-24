@@ -35,9 +35,16 @@ export async function generateMetadata({
     };
 }
 
-export default async function ProfileRoute({ params }: ProfileRouteProps) {
-    const { userId } = await params;
+export default function ProfileRoute({ params }: ProfileRouteProps) {
+    return (
+        <Suspense fallback={<ProfileSkeleton />}>
+            <UserProfile params={params} />
+        </Suspense>
+    );
+}
 
+async function UserProfile({ params }: { params: ProfileRouteProps["params"] }) {
+    const { userId } = await params;
     const user = await fetchQuery(api.users.getUserProfile, { userId });
 
     if (!user) {
@@ -66,7 +73,6 @@ export default async function ProfileRoute({ params }: ProfileRouteProps) {
 
     return (
         <div className="py-12 animate-in fade-in duration-500">
-            {/* Profile Header */}
             <div className="max-w-3xl mx-auto flex flex-col items-center text-center mb-16">
                 <Avatar className="size-32 mb-6 shadow-md border-4 border-background">
                     <AvatarImage src={user.image || ""} />
@@ -82,7 +88,6 @@ export default async function ProfileRoute({ params }: ProfileRouteProps) {
                 </p>
             </div>
 
-            {/* Author's Posts */}
             <div className="space-y-6">
                 <h2 className="text-2xl font-bold tracking-tight border-b pb-4">
                     Posts by {user.name}
@@ -171,6 +176,25 @@ function SkeletonLoadingUi() {
                     </div>
                 </div>
             ))}
+        </div>
+    );
+}
+
+function ProfileSkeleton() {
+    return (
+        <div className="py-12 animate-in fade-in duration-500">
+            <div className="max-w-3xl mx-auto flex flex-col items-center text-center mb-16">
+                <Skeleton className="size-32 rounded-full mb-6" />
+                <Skeleton className="h-10 w-64 mb-4" />
+                <Skeleton className="h-6 w-40" />
+            </div>
+            
+            <div className="space-y-6">
+                <div className="border-b pb-4">
+                    <Skeleton className="h-8 w-48" />
+                </div>
+                <SkeletonLoadingUi />
+            </div>
         </div>
     );
 }

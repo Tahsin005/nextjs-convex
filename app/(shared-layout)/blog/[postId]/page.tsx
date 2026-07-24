@@ -13,6 +13,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { calculateReadingTime } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Suspense } from "react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -66,9 +68,16 @@ export async function generateMetadata({
     };
 }
 
-export default async function PostIdRoute({ params }: PostIdRouteProps) {
-    const { postId } = await params;
+export default function PostIdRoute({ params }: PostIdRouteProps) {
+    return (
+        <Suspense fallback={<PostSkeleton />}>
+            <PostContent params={params} />
+        </Suspense>
+    );
+}
 
+async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
+    const { postId } = await params;
     const token = await getToken();
 
     const [post, preloadedComments, userId] = await Promise.all([
@@ -136,8 +145,8 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-4">
-                    <Link 
-                        href={`/profile/${post.authorId}`} 
+                    <Link
+                        href={`/profile/${post.authorId}`}
                         className="flex items-center gap-2 hover:text-primary transition-colors"
                     >
                         <Avatar className="size-8">
@@ -146,7 +155,7 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                         </Avatar>
                         <span className="font-medium text-foreground">{post.author?.name}</span>
                     </Link>
-                    
+
                     <div className="h-4 w-px bg-border hidden sm:block" />
 
                     <p className="text-sm text-muted-foreground">
@@ -169,6 +178,25 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                 <Separator className="my-8" />
 
                 <CommentSection preloadedComments={preloadedComments} />
+            </div>
+        </div>
+    )
+}
+
+function PostSkeleton() {
+    return (
+        <div className="max-w-3xl mx-auto py-8 px-4">
+            <Skeleton className="h-10 w-24 mb-6" />
+            <Skeleton className="w-full h-[400px] mb-8 rounded-xl" />
+            <div className="space-y-4">
+                <Skeleton className="h-12 w-3/4" />
+
+                <Skeleton className="h-4 w-32" />
+            </div>
+            <div className="mt-8 space-y-2">
+                <Skeleton className="w-full h-4" />
+                <Skeleton className="w-full h-4" />
+                <Skeleton className="w-2/3 h-4" />
             </div>
         </div>
     )
