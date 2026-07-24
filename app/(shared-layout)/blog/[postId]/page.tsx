@@ -1,6 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { CommentSection } from "@/components/web/CommentSection";
+import { PostPresence } from "@/components/web/PostPresence";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { getToken } from "@/lib/auth-server";
@@ -67,11 +68,12 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
 
     const token = await getToken();
 
-    const [post, preloadedComments] = await Promise.all([
+    const [post, preloadedComments, userId] = await Promise.all([
         await fetchQuery(api.posts.getPostById, { postId: postId }),
         await preloadQuery(api.comments.getCommentsByPostId, {
             postId: postId,
         }),
+        await fetchQuery(api.presence.getUserId, {}, { token }),
     ]);
 
     if (!post) {
@@ -131,6 +133,7 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                         Posted on:{" "}
                         {new Date(post._creationTime).toLocaleDateString("de-DE")}
                     </p>
+                    {userId && <PostPresence roomId={post._id} userId={userId} />}
                 </div>
 
                 <Separator className="my-8" />
