@@ -20,4 +20,11 @@ export default defineSchema({
         authorName: v.string(),
         body: v.string(),
     }),
+    reactions: defineTable({
+        postId: v.id("posts"),
+        userId: v.string(),
+        type: v.string(),
+    })
+        .index("by_post", ["postId"])
+        .index("by_post_and_user_and_type", ["postId", "userId", "type"]),
 });

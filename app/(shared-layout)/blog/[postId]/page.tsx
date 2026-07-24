@@ -16,6 +16,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostActions } from "@/components/web/PostActions";
+import { PostReactions } from "@/components/web/PostReactions";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -81,11 +82,12 @@ async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
     const { postId } = await params;
     const token = await getToken();
 
-    const [post, preloadedComments, userId] = await Promise.all([
+    const [post, preloadedComments, preloadedReactions, userId] = await Promise.all([
         await fetchQuery(api.posts.getPostById, { postId: postId }),
         await preloadQuery(api.comments.getCommentsByPostId, {
             postId: postId,
         }),
+        await preloadQuery(api.reactions.getReactions, { postId: postId }, { token }),
         await fetchQuery(api.presence.getUserId, {}, { token }),
     ]);
 
@@ -180,6 +182,8 @@ async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
                 <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
                     {post.body}
                 </p>
+
+                <PostReactions preloadedReactions={preloadedReactions} postId={post._id} />
 
                 <Separator className="my-8" />
 
