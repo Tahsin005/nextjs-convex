@@ -39,9 +39,15 @@ export const getPosts = query({
                         ? await ctx.storage.getUrl(post.imageStorageId)
                         : null;
 
+                const author = await authComponent.getAnyUserById(ctx, post.authorId);
+
                 return {
                     ...post,
                     imageUrl: resolvedImageUrl,
+                    author: {
+                        name: author?.name ?? "Unknown",
+                        image: author?.image ?? null,
+                    },
                 };
             })
         );
@@ -77,10 +83,49 @@ export const getPostById = query({
                 ? await ctx.storage.getUrl(post.imageStorageId)
                 : null;
 
+        const author = await authComponent.getAnyUserById(ctx, post.authorId);
+
         return {
             ...post,
             imageUrl: resolvedImageUrl,
+            author: {
+                name: author?.name ?? "Unknown",
+                image: author?.image ?? null,
+            },
         };
+    },
+});
+
+export const getPostsByAuthor = query({
+    args: {
+        authorId: v.string(),
+    },
+    handler: async (ctx, args) => {
+        const posts = await ctx.db
+            .query("posts")
+            .filter((q) => q.eq(q.field("authorId"), args.authorId))
+            .order("desc")
+            .collect();
+
+        return await Promise.all(
+            posts.map(async (post) => {
+                const resolvedImageUrl =
+                    post.imageStorageId !== undefined
+                        ? await ctx.storage.getUrl(post.imageStorageId)
+                        : null;
+
+                const author = await authComponent.getAnyUserById(ctx, post.authorId);
+
+                return {
+                    ...post,
+                    imageUrl: resolvedImageUrl,
+                    author: {
+                        name: author?.name ?? "Unknown",
+                        image: author?.image ?? null,
+                    },
+                };
+            })
+        );
     },
 });
 

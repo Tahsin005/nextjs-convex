@@ -12,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { calculateReadingTime } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -135,6 +136,19 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                 </h1>
 
                 <div className="flex flex-wrap items-center gap-4">
+                    <Link 
+                        href={`/profile/${post.authorId}`} 
+                        className="flex items-center gap-2 hover:text-primary transition-colors"
+                    >
+                        <Avatar className="size-8">
+                            <AvatarImage src={post.author?.image || ""} />
+                            <AvatarFallback>{post.author?.name?.[0] || "?"}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium text-foreground">{post.author?.name}</span>
+                    </Link>
+                    
+                    <div className="h-4 w-px bg-border hidden sm:block" />
+
                     <p className="text-sm text-muted-foreground">
                         Posted on:{" "}
                         {new Date(post._creationTime).toLocaleDateString("de-DE")}

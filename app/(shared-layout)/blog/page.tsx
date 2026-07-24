@@ -10,6 +10,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { calculateReadingTime } from "@/lib/utils";
 import { Clock } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export const metadata: Metadata = {
     title: "Blog",
@@ -73,9 +74,21 @@ async function LoadBlogList() {
                                 {post.title}
                             </h1>
                         </Link>
-                        <div className="flex items-center text-xs text-muted-foreground mt-2 mb-3">
-                            <Clock className="mr-1 size-3" />
-                            {calculateReadingTime(post.body)}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 mb-3">
+                            <Link 
+                                href={`/profile/${post.authorId}`} 
+                                className="flex items-center gap-2 hover:text-primary transition-colors"
+                            >
+                                <Avatar className="size-6">
+                                    <AvatarImage src={post.author?.image || ""} />
+                                    <AvatarFallback>{post.author?.name?.[0] || "?"}</AvatarFallback>
+                                </Avatar>
+                                <span className="font-medium text-foreground">{post.author?.name}</span>
+                            </Link>
+                            <div className="flex items-center">
+                                <Clock className="mr-1 size-3" />
+                                {calculateReadingTime(post.body)}
+                            </div>
                         </div>
                         <p className="text-muted-foreground line-clamp-3">{post.body}</p>
                     </CardContent>
