@@ -180,3 +180,69 @@ export const searchPosts = query({
         return results;
     },
 });
+
+export const deletePost = mutation({
+    args: {
+        postId: v.id("posts"),
+    },
+    handler: async (ctx, args) => {
+        const user = await authComponent.safeGetAuthUser(ctx);
+        if (!user) throw new ConvexError("Not authenticated");
+
+        const post = await ctx.db.get(args.postId);
+        if (!post) throw new ConvexError("Post not found");
+
+        if (post.authorId !== user._id) {
+            throw new ConvexError("Unauthorized to delete this post");
+        }
+
+        if (post.imageStorageId) {
+            await ctx.storage.delete(post.imageStorageId);
+        }
+
+        const comments = await ctx.db
+            .query("comments")
+            .filter((q) => q.eq(q.field("postId"), args.postId))
+            .collect();
+
+        for (const comment of comments) {
+            await ctx.db.delete(comment._id);
+        }
+
+        await ctx.db.delete(args.postId);
+    },
+});
+
+export const updatePost = mutation({
+    args: {
+        postId: v.id("posts"),
+        title: v.string(),
+        body: v.string(),
+        imageStorageId: v.optional(v.id("_storage")),
+    },
+    handler: async (ctx, args) => {
+        const user = await authComponent.safeGetAuthUser(ctx);
+        if (!user) throw new ConvexError("Not authenticated");
+
+        const post = await ctx.db.get(args.postId);
+        if (!post) throw new ConvexError("Post not found");
+
+        if (post.authorId !== user._id) {
+            throw new ConvexError("Unauthorized to update this post");
+        }
+
+        const updateData: any = {
+            title: args.title,
+            body: args.body,
+        };
+
+        if (args.imageStorageId) {
+            if (post.imageStorageId) {
+                await ctx.storage.delete(post.imageStorageId);
+            }
+            updateData.imageStorageId = args.imageStorageId;
+        }
+
+        await ctx.db.patch(args.postId, updateData);
+    },
+});

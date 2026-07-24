@@ -15,6 +15,7 @@ import { calculateReadingTime } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PostActions } from "@/components/web/PostActions";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -167,6 +168,11 @@ async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
                         {calculateReadingTime(post.body)}
                     </div>
                     {userId && <PostPresence roomId={post._id} userId={userId} />}
+                    {userId === post.authorId && (
+                        <div className="ml-auto">
+                            <PostActions postId={post._id} />
+                        </div>
+                    )}
                 </div>
 
                 <Separator className="my-8" />
