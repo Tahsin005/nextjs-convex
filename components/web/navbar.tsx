@@ -1,5 +1,5 @@
 "use client";
-
+ 
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
@@ -8,15 +8,19 @@ import { useRouter } from "next/navigation";
 import { useConvexAuth } from "convex/react";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { Loader2, Menu } from "lucide-react";
+import { Loader2, Menu, Search, X } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { SearchInput } from "./SearchInput";
+import { useState } from "react";
 
 export function Navbar() {
     const { isAuthenticated, isLoading } = useConvexAuth();
     const router = useRouter();
+    const [isSearchOpen, setIsSearchOpen] = useState(false);
+
     return (
         <nav className="w-full py-5 flex items-center justify-between">
-            <div className="flex items-center gap-4 md:gap-8">
+            <div className={cn("flex items-center gap-4 md:gap-8", isSearchOpen && "hidden md:flex")}>
                 <Link href="/">
                     <h1 className="text-2xl md:text-3xl font-bold">
                         Next<span className="text-primary">Pro</span>
@@ -36,7 +40,21 @@ export function Navbar() {
                 </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className={cn("flex items-center gap-2", isSearchOpen && "hidden md:flex")}>
+                <div className="hidden md:block mr-2">
+                    <SearchInput />
+                </div>
+
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    className="md:hidden"
+                    onClick={() => setIsSearchOpen(true)}
+                >
+                    <Search className="size-5" />
+                    <span className="sr-only">Open search</span>
+                </Button>
+
                 {isLoading ? (
                     <div className="flex items-center justify-center px-4">
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
@@ -95,6 +113,22 @@ export function Navbar() {
                     </DropdownMenu>
                 </div>
             </div>
+
+            {isSearchOpen && (
+                <div className="flex items-center gap-2 w-full md:hidden animate-in fade-in-0 slide-in-from-top-1 duration-200">
+                    <div className="flex-1">
+                        <SearchInput />
+                    </div>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setIsSearchOpen(false)}
+                    >
+                        <X className="size-5" />
+                        <span className="sr-only">Close search</span>
+                    </Button>
+                </div>
+            )}
         </nav>
     )
 }
