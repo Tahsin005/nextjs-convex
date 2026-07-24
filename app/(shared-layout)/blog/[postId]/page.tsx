@@ -6,11 +6,12 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { getToken } from "@/lib/auth-server";
 import { fetchQuery, preloadQuery } from "convex/nextjs";
-import { ArrowLeft, FileQuestion } from "lucide-react";
+import { ArrowLeft, FileQuestion, Clock } from "lucide-react";
 import { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { calculateReadingTime } from "@/lib/utils";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -133,11 +134,15 @@ export default async function PostIdRoute({ params }: PostIdRouteProps) {
                     {post.title}
                 </h1>
 
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-4">
                     <p className="text-sm text-muted-foreground">
                         Posted on:{" "}
                         {new Date(post._creationTime).toLocaleDateString("de-DE")}
                     </p>
+                    <div className="flex items-center text-sm text-muted-foreground">
+                        <Clock className="mr-1.5 size-4" />
+                        {calculateReadingTime(post.body)}
+                    </div>
                     {userId && <PostPresence roomId={post._id} userId={userId} />}
                 </div>
 

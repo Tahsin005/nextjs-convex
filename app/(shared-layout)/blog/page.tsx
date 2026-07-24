@@ -8,6 +8,8 @@ import { cacheLife, cacheTag } from "next/cache";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
+import { calculateReadingTime } from "@/lib/utils";
+import { Clock } from "lucide-react";
 
 export const metadata: Metadata = {
     title: "Blog",
@@ -71,6 +73,10 @@ async function LoadBlogList() {
                                 {post.title}
                             </h1>
                         </Link>
+                        <div className="flex items-center text-xs text-muted-foreground mt-2 mb-3">
+                            <Clock className="mr-1 size-3" />
+                            {calculateReadingTime(post.body)}
+                        </div>
                         <p className="text-muted-foreground line-clamp-3">{post.body}</p>
                     </CardContent>
                     <CardFooter>
