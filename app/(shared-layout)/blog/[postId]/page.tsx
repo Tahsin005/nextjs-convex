@@ -18,6 +18,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PostActions } from "@/components/web/PostActions";
 import { PostReactions } from "@/components/web/PostReactions";
 import { BookmarkButton } from "@/components/web/BookmarkButton";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -195,9 +197,11 @@ async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
 
                 <Separator className="my-8" />
 
-                <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
-                    {post.body}
-                </p>
+                <div className="prose prose-lg dark:prose-invert max-w-none w-full">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {post.body}
+                    </ReactMarkdown>
+                </div>
 
                 <PostReactions preloadedReactions={preloadedReactions} postId={post._id} />
 

@@ -14,7 +14,13 @@ import {
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const TiptapEditor = dynamic(
+    () => import("@/components/web/TiptapEditor").then(mod => mod.TiptapEditor),
+    { ssr: false, loading: () => <Skeleton className="w-full min-h-[300px]" /> }
+);
 import { useTransition } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -78,11 +84,9 @@ export function EditPostForm({ post }: { post: any }) {
                             render={({ field, fieldState }) => (
                                 <Field>
                                     <FieldLabel>Content</FieldLabel>
-                                    <Textarea
-                                        aria-invalid={fieldState.invalid}
-                                        placeholder="Super cool blog content"
-                                        className="min-h-[200px]"
-                                        {...field}
+                                    <TiptapEditor
+                                        value={field.value}
+                                        onChange={field.onChange}
                                     />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />

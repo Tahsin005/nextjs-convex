@@ -133,7 +133,9 @@ export default function InfinitePostsList({ initialData, tag }: InfinitePostsLis
                                     {calculateReadingTime(post.body)}
                                 </div>
                             </div>
-                            <p className="text-muted-foreground line-clamp-3">{post.body}</p>
+                            <p className="text-muted-foreground line-clamp-3">
+                                {post.body.replace(/<[^>]+>/g, ' ')}
+                            </p>
                             {post.tags && post.tags.length > 0 && (
                                 <div className="flex flex-wrap gap-2 mt-4">
                                     {post.tags.map((t: string) => (
