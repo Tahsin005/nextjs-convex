@@ -39,12 +39,17 @@ export async function createBlogAction(values: z.infer<typeof postSchema>) {
 
         const { storageId } = await uploadResult.json();
 
+        const tagsArray = parsed.data.tags
+            ? parsed.data.tags.split(",").map(t => t.trim().toLowerCase()).filter(t => t.length > 0)
+            : [];
+
         await fetchMutation(
             api.posts.createPost,
             {
                 body: parsed.data.content,
                 title: parsed.data.title,
                 imageStorageId: storageId,
+                ...(tagsArray.length > 0 ? { tags: tagsArray } : {}),
             },
             { token }
         );
@@ -114,6 +119,10 @@ export async function editBlogAction(postId: string, values: z.infer<typeof edit
             storageId = json.storageId;
         }
 
+        const tagsArray = parsed.data.tags
+            ? parsed.data.tags.split(",").map(t => t.trim().toLowerCase()).filter(t => t.length > 0)
+            : [];
+
         await fetchMutation(
             api.posts.updatePost,
             {
@@ -121,6 +130,7 @@ export async function editBlogAction(postId: string, values: z.infer<typeof edit
                 body: parsed.data.content,
                 title: parsed.data.title,
                 ...(storageId ? { imageStorageId: storageId } : {}),
+                ...(tagsArray.length > 0 ? { tags: tagsArray } : { tags: [] }),
             },
             { token }
         );

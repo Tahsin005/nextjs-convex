@@ -177,6 +177,20 @@ async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
                     )}
                 </div>
 
+                {post.tags && post.tags.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-4">
+                        {post.tags.map((t: string) => (
+                            <Link 
+                                key={t} 
+                                href={`/blog?tag=${t}`}
+                                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                            >
+                                #{t}
+                            </Link>
+                        ))}
+                    </div>
+                )}
+
                 <Separator className="my-8" />
 
                 <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">

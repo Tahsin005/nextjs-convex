@@ -31,7 +31,8 @@ export default function CreateRoute() {
         defaultValues: {
             content: "",
             title: "",
-            image: undefined
+            image: undefined,
+            tags: "",
         },
     });
 
@@ -90,6 +91,25 @@ export default function CreateRoute() {
                                             aria-invalid={fieldState.invalid}
                                             placeholder="Super cool blog content"
                                             {...field}
+                                        />
+                                        {fieldState.invalid && (
+                                            <FieldError errors={[fieldState.error]} />
+                                        )}
+                                    </Field>
+                                )}
+                            />
+
+                            <Controller
+                                name="tags"
+                                control={form.control}
+                                render={({ field, fieldState }) => (
+                                    <Field>
+                                        <FieldLabel>Tags (optional)</FieldLabel>
+                                        <Input
+                                            aria-invalid={fieldState.invalid}
+                                            placeholder="tech, react, nextjs"
+                                            {...field}
+                                            value={field.value || ""}
                                         />
                                         {fieldState.invalid && (
                                             <FieldError errors={[fieldState.error]} />

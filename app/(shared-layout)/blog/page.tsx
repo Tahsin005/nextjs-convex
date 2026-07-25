@@ -29,9 +29,22 @@ export const metadata: Metadata = {
     }
 };
 
-export default function BlogPage() {
+export default function BlogPage(props: { searchParams: Promise<{ tag?: string }> }) {
     return (
         <div className="py-12">
+            <Suspense fallback={<SkeletonLoadingUi />}>
+                <BlogContent searchParams={props.searchParams} />
+            </Suspense>
+        </div>
+    );
+};
+
+async function BlogContent({ searchParams }: { searchParams: Promise<{ tag?: string }> }) {
+    const params = await searchParams;
+    const tag = params.tag;
+
+    return (
+        <>
             <div className="text-center pb-12">
                 <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
                     Our Blog
@@ -39,20 +52,27 @@ export default function BlogPage() {
                 <p className="pt-4 max-w-2xl mx-auto text-xl text-muted-foreground">
                     Insights, thoughts, and trends from our team.
                 </p>
+                {tag && (
+                    <div className="mt-4 flex items-center justify-center gap-2">
+                        <span className="text-sm text-muted-foreground">Filtering by:</span>
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                            #{tag}
+                        </span>
+                        <Link href="/blog" className="text-xs hover:underline text-muted-foreground ml-2">Clear</Link>
+                    </div>
+                )}
             </div>
 
-            <Suspense fallback={<SkeletonLoadingUi />}>
-                <LoadBlogList />
-            </Suspense>
-        </div>
+            <LoadBlogList tag={tag} />
+        </>
     );
-};
+}
 
-async function LoadBlogList() {
+async function LoadBlogList({ tag }: { tag?: string }) {
     "use cache";
     cacheLife("hours");
     cacheTag("blog");
-    const data = await fetchQuery(api.posts.getPosts);
+    const data = await fetchQuery(api.posts.getPosts, { tag });
     return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {data?.map((post) => (
@@ -91,6 +111,19 @@ async function LoadBlogList() {
                             </div>
                         </div>
                         <p className="text-muted-foreground line-clamp-3">{post.body}</p>
+                        {post.tags && post.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-4">
+                                {post.tags.map((t: string) => (
+                                    <Link 
+                                        key={t} 
+                                        href={`/blog?tag=${t}`}
+                                        className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"
+                                    >
+                                        #{t}
+                                    </Link>
+                                ))}
+                            </div>
+                        )}
                     </CardContent>
                     <CardFooter>
                         <Link

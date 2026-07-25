@@ -34,6 +34,7 @@ export function EditPostForm({ post }: { post: any }) {
             content: post.body,
             title: post.title,
             image: undefined,
+            tags: post.tags ? post.tags.join(", ") : "",
         },
     });
 
@@ -82,6 +83,25 @@ export function EditPostForm({ post }: { post: any }) {
                                         placeholder="Super cool blog content"
                                         className="min-h-[200px]"
                                         {...field}
+                                    />
+                                    {fieldState.invalid && (
+                                        <FieldError errors={[fieldState.error]} />
+                                    )}
+                                </Field>
+                            )}
+                        />
+
+                        <Controller
+                            name="tags"
+                            control={form.control}
+                            render={({ field, fieldState }) => (
+                                <Field>
+                                    <FieldLabel>Tags (optional)</FieldLabel>
+                                    <Input
+                                        aria-invalid={fieldState.invalid}
+                                        placeholder="tech, react, nextjs"
+                                        {...field}
+                                        value={field.value || ""}
                                     />
                                     {fieldState.invalid && (
                                         <FieldError errors={[fieldState.error]} />

@@ -8,6 +8,7 @@ export const createPost = mutation({
         title: v.string(),
         body: v.string(),
         imageStorageId: v.id("_storage"),
+        tags: v.optional(v.array(v.string())),
     },
     handler: async (ctx, args) => {
         const user = await authComponent.safeGetAuthUser(ctx);
@@ -21,6 +22,7 @@ export const createPost = mutation({
             title: args.title,
             authorId: user._id,
             imageStorageId: args.imageStorageId,
+            tags: args.tags,
         });
 
         return blogArticle;
@@ -28,9 +30,15 @@ export const createPost = mutation({
 });
 
 export const getPosts = query({
-    args: {},
-    handler: async (ctx) => {
-        const posts = await ctx.db.query("posts").order("desc").collect();
+    args: {
+        tag: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        let posts = await ctx.db.query("posts").order("desc").collect();
+
+        if (args.tag) {
+            posts = posts.filter((post) => post.tags?.includes(args.tag!));
+        }
 
         return await Promise.all(
             posts.map(async (post) => {
@@ -219,6 +227,7 @@ export const updatePost = mutation({
         title: v.string(),
         body: v.string(),
         imageStorageId: v.optional(v.id("_storage")),
+        tags: v.optional(v.array(v.string())),
     },
     handler: async (ctx, args) => {
         const user = await authComponent.safeGetAuthUser(ctx);
@@ -235,6 +244,10 @@ export const updatePost = mutation({
             title: args.title,
             body: args.body,
         };
+
+        if (args.tags !== undefined) {
+            updateData.tags = args.tags;
+        }
 
         if (args.imageStorageId) {
             if (post.imageStorageId) {
