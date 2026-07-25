@@ -19,7 +19,14 @@ export default defineSchema({
         authorId: v.string(),
         authorName: v.string(),
         body: v.string(),
-    }),
+        parentId: v.optional(v.id("comments")),
+    }).index("by_post", ["postId"]),
+    commentLikes: defineTable({
+        commentId: v.id("comments"),
+        userId: v.string(),
+    })
+        .index("by_comment", ["commentId"])
+        .index("by_comment_and_user", ["commentId", "userId"]),
     reactions: defineTable({
         postId: v.id("posts"),
         userId: v.string(),

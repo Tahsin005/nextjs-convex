@@ -5,7 +5,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
-import { useConvexAuth } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
 import { Loader2, Menu, Search, X } from "lucide-react";
@@ -15,6 +16,7 @@ import { useState } from "react";
 
 export function Navbar() {
     const { isAuthenticated, isLoading } = useConvexAuth();
+    const userId = useQuery(api.presence.getUserId);
     const router = useRouter();
     const [isSearchOpen, setIsSearchOpen] = useState(false);
 
@@ -60,23 +62,33 @@ export function Navbar() {
                         <Loader2 className="size-4 animate-spin text-muted-foreground" />
                     </div>
                 ) : isAuthenticated ? (
-                    <Button
-                        onClick={() =>
-                            authClient.signOut({
-                                fetchOptions: {
-                                    onSuccess: () => {
-                                        toast.success("Logged out successfully");
-                                        router.push("/");
+                    <>
+                        {userId && (
+                            <Link 
+                                className={cn(buttonVariants({ variant: "outline" }), "hidden sm:inline-flex")} 
+                                href={`/profile/${userId}`}
+                            >
+                                Profile
+                            </Link>
+                        )}
+                        <Button
+                            onClick={() =>
+                                authClient.signOut({
+                                    fetchOptions: {
+                                        onSuccess: () => {
+                                            toast.success("Logged out successfully");
+                                            router.push("/");
+                                        },
+                                        onError: (error) => {
+                                            toast.error(error.error.message);
+                                        },
                                     },
-                                    onError: (error) => {
-                                        toast.error(error.error.message);
-                                    },
-                                },
-                            })
-                        }
-                    >
-                        Logout
-                    </Button>
+                                })
+                            }
+                        >
+                            Logout
+                        </Button>
+                    </>
                 ) : (
                     <>
                         <Link className={cn(buttonVariants(), "hidden sm:inline-flex")} href="/auth/sign-up">
@@ -109,6 +121,11 @@ export function Navbar() {
                             <DropdownMenuItem render={<Link href="/create" />}>
                                 Create
                             </DropdownMenuItem>
+                            {isAuthenticated && userId && (
+                                <DropdownMenuItem render={<Link href={`/profile/${userId}`} />}>
+                                    Profile
+                                </DropdownMenuItem>
+                            )}
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
