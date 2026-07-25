@@ -17,6 +17,7 @@ import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PostActions } from "@/components/web/PostActions";
 import { PostReactions } from "@/components/web/PostReactions";
+import { BookmarkButton } from "@/components/web/BookmarkButton";
 
 interface PostIdRouteProps {
     params: Promise<{
@@ -170,11 +171,12 @@ async function PostContent({ params }: { params: PostIdRouteProps["params"] }) {
                         {calculateReadingTime(post.body)}
                     </div>
                     {userId && <PostPresence roomId={post._id} userId={userId} />}
-                    {userId === post.authorId && (
-                        <div className="ml-auto">
+                    <div className="ml-auto flex items-center gap-1">
+                        <BookmarkButton postId={post._id} />
+                        {userId === post.authorId && (
                             <PostActions postId={post._id} />
-                        </div>
-                    )}
+                        )}
+                    </div>
                 </div>
 
                 {post.tags && post.tags.length > 0 && (

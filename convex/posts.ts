@@ -217,6 +217,15 @@ export const deletePost = mutation({
             await ctx.db.delete(comment._id);
         }
 
+        const bookmarks = await ctx.db
+            .query("bookmarks")
+            .withIndex("by_post", (q) => q.eq("postId", args.postId))
+            .collect();
+
+        for (const bookmark of bookmarks) {
+            await ctx.db.delete(bookmark._id);
+        }
+
         await ctx.db.delete(args.postId);
     },
 });

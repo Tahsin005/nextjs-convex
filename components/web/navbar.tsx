@@ -9,7 +9,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { Loader2, Menu, Search, X } from "lucide-react";
+import { Loader2, Menu, Search, X, Bookmark } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { SearchInput } from "./SearchInput";
 import { useState } from "react";
@@ -64,13 +64,22 @@ export function Navbar() {
                 ) : isAuthenticated ? (
                     <>
                         {userId && (
+                        <>
+                            <Link 
+                                className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "hidden sm:inline-flex gap-1.5")} 
+                                href="/bookmarks"
+                            >
+                                <Bookmark className="size-4" />
+                                Bookmarks
+                            </Link>
                             <Link 
                                 className={cn(buttonVariants({ variant: "outline" }), "hidden sm:inline-flex")} 
                                 href={`/profile/${userId}`}
                             >
                                 Profile
                             </Link>
-                        )}
+                        </>
+                    )}
                         <Button
                             onClick={() =>
                                 authClient.signOut({
@@ -122,9 +131,14 @@ export function Navbar() {
                                 Create
                             </DropdownMenuItem>
                             {isAuthenticated && userId && (
-                                <DropdownMenuItem render={<Link href={`/profile/${userId}`} />}>
-                                    Profile
-                                </DropdownMenuItem>
+                                <>
+                                    <DropdownMenuItem render={<Link href="/bookmarks" />}>
+                                        Bookmarks
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem render={<Link href={`/profile/${userId}`} />}>
+                                        Profile
+                                    </DropdownMenuItem>
+                                </>
                             )}
                         </DropdownMenuContent>
                     </DropdownMenu>
