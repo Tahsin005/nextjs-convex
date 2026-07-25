@@ -1,5 +1,6 @@
 import { mutation, query } from "./_generated/server";
 import { ConvexError, v } from "convex/values";
+import { paginationOptsValidator } from "convex/server";
 import { authComponent } from "./auth";
 import { Doc } from "./_generated/dataModel";
 
@@ -61,6 +62,49 @@ export const getPosts = query({
         );
     },
 });
+
+export const getPaginatedPosts = query({
+    args: {
+        paginationOpts: paginationOptsValidator,
+        tag: v.optional(v.string()),
+    },
+    handler: async (ctx, args) => {
+        const result = await ctx.db
+            .query("posts")
+            .order("desc")
+            .paginate(args.paginationOpts);
+
+        const enriched = await Promise.all(
+            result.page.map(async (post) => {
+                if (args.tag && !post.tags?.includes(args.tag)) {
+                    return null;
+                }
+
+                const resolvedImageUrl =
+                    post.imageStorageId !== undefined
+                        ? await ctx.storage.getUrl(post.imageStorageId)
+                        : null;
+
+                const author = await authComponent.getAnyUserById(ctx, post.authorId);
+
+                return {
+                    ...post,
+                    imageUrl: resolvedImageUrl,
+                    author: {
+                        name: author?.name ?? "Unknown",
+                        image: author?.image ?? null,
+                    },
+                };
+            })
+        );
+
+        return {
+            ...result,
+            page: enriched.filter((p): p is NonNullable<typeof p> => p !== null),
+        };
+    },
+});
+
 
 export const generateImageUploadUrl = mutation({
     args: {},
